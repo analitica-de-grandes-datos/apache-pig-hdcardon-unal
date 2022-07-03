@@ -34,3 +34,18 @@ $ pig -x local -f pregunta.pig
         >>> Escriba su respuesta a partir de este punto <<<
 */
 
+data = LOAD './data.csv' USING PigStorage(',')
+    AS (
+            id:int,
+            name:chararray,
+            lastname:chararray,
+            birth_date:datetime,
+            colour:chararray,
+            children:int
+    );
+
+date_tbl = FOREACH data GENERATE ToString(birth_date, 'yyyy-MM-dd,dd,d,EEE,EEEE') AS date;
+
+date_lower_tbl = FOREACH date_tbl GENERATE LOWER(date);
+
+STORE date_lower_tbl INTO 'output/' using PigStorage(',');

@@ -14,3 +14,14 @@ $ pig -x local -f pregunta.pig
 
         >>> Escriba su respuesta a partir de este punto <<<
 */
+data = LOAD './data.tsv'
+    AS (
+            column1:CHARARRAY,
+            column2:BAG{},
+            column3:MAP[]
+    );
+
+count = FOREACH data GENERATE column1, SIZE(column2) AS words, SIZE(column3) AS characters;
+count_ordered = ORDER count BY column1,words,characters;
+
+STORE count_ordered INTO 'output/' using PigStorage(',');

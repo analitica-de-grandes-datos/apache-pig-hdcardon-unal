@@ -19,4 +19,18 @@ $ pig -x local -f pregunta.pig
         >>> Escriba su respuesta a partir de este punto <<<
 */
 
+data = LOAD './data.csv' USING PigStorage(',')
+    AS (
+            id:int,
+            name:chararray,
+            lastname:chararray,
+            birth_date:chararray,
+            colour:chararray,
+            children:int
+    );
 
+birthday_tbl = FOREACH data GENERATE birth_date AS birthday;
+
+birthday_filtered = FOREACH birthday_tbl GENERATE SUBSTRING(birthday,5,7);
+
+STORE birthday_filtered INTO 'output/' using PigStorage(',');
