@@ -34,18 +34,25 @@ $ pig -x local -f pregunta.pig
         >>> Escriba su respuesta a partir de este punto <<<
 */
 
-data = LOAD './data.csv' USING PigStorage(',')
-    AS (
-            id:int,
-            name:chararray,
-            lastname:chararray,
-            birth_date:datetime,
-            colour:chararray,
-            children:int
-    );
+datos = LOAD 'data.csv' USING PigStorage(',')
+   AS (
+        id:int,
+        name:chararray,
+        lastname:chararray,
+        date:chararray,
+        color:chararray,
+        value:int
+   );
 
-date_tbl = FOREACH data GENERATE ToString(birth_date, 'yyyy-MM-dd,dd,d,EEE,EEEE') AS date;
+consulta = FOREACH datos GENERATE date,FLATTEN(STRSPLIT(date,'-',3));
 
-date_lower_tbl = FOREACH date_tbl GENERATE LOWER(date);
+cast1 = FOREACH consulta GENERATE $0,$3,REGEX_EXTRACT($3,'0*(\\d+)?', 1),ToString(ToDate($0,'yyyy-MM-dd'),'EEE'),ToString(ToDate($0,'yyyy-MM-dd'),'EEE');
 
-STORE date_lower_tbl INTO 'output/' using PigStorage(',');
+cast2 = FOREACH cast1 GENERATE $0,$1,$2,REPLACE($3,'Thu','jue'), REPLACE($4,'Thu','jueves');
+cast3 = FOREACH cast2 GENERATE $0,$1,$2,REPLACE($3,'Wed','mie'), REPLACE($4,'Wed','miercoles');
+cast4 = FOREACH cast3 GENERATE $0,$1,$2,REPLACE($3,'Sun','dom'), REPLACE($4,'Sun','domingo');
+cast5 = FOREACH cast4 GENERATE $0,$1,$2,REPLACE($3,'Fri','vie'), REPLACE($4,'Fri','viernes');
+cast6 = FOREACH cast5 GENERATE $0,$1,$2,REPLACE($3,'Mon','lun'), REPLACE($4,'Mon','lunes');
+cast7 = FOREACH cast6 GENERATE $0,$1,$2,REPLACE($3,'Tue','mar'), REPLACE($4,'Tue','martes');
+
+STORE cast7 INTO 'output' USING PigStorage(',');
