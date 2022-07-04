@@ -34,3 +34,23 @@ $ pig -x local -f pregunta.pig
         >>> Escriba su respuesta a partir de este punto <<<
 */
 
+datos = LOAD 'data.csv' USING PigStorage(',')
+   AS (
+        id:int,
+        name:chararray,
+        lastname:chararray,
+        date:chararray,
+        color:chararray,
+        value:int
+   );
+
+consulta = FOREACH datos GENERATE date,FLATTEN(STRSPLIT(date,'-',3));
+
+cast1 = FOREACH consulta GENERATE $0,LOWER(ToString($0,'MMM')),$2,REGEX_EXTRACT($2,'0*(\\d+)?', 1);
+
+cast2 = FOREACH cast1 GENERATE $0,REPLACE($1,'apr','abr'),$2,$3;
+cast3 = FOREACH cast2 GENERATE $0,REPLACE($1,'jan','ene'),$2,$3;
+cast4 = FOREACH cast3 GENERATE $0,REPLACE($1,'aug','ago'),$2,$3;
+cast5 = FOREACH cast4 GENERATE $0,REPLACE($1,'dec','dic'),$2,$3;
+
+STORE cast5 INTO 'output' USING PigStorage(',');
